@@ -20,6 +20,21 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+
+    // Search all products
+    @GetMapping
+    public List<User> getAllUsers(){
+        return userRepository.findAll();
+    }
+
+    // Search product by id
+    @GetMapping("/search/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id){
+        Optional<User> user = userService.getUserById(id);
+
+        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     // Create a new user
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user){
@@ -28,20 +43,7 @@ public class UserController {
         return ResponseEntity.ok(createdUser);
     }
 
-    @GetMapping
-    public List<User> getAllUsers(){
-        return userRepository.findAll();
-    }
-
-    //
-    @GetMapping("/search/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id){
-        Optional<User> user = userService.getUserById(id);
-
-        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    //
+    // Update user by id
     @PutMapping("/update/{id}")
     public ResponseEntity<User> updateUserById(@PathVariable Long id, @RequestBody User updatedUser){
         try{
@@ -53,9 +55,9 @@ public class UserController {
         }
     }
 
-    //
+    // Delete user by id
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id){
+    public ResponseEntity<Void> deleteUserById(@PathVariable Long id){
         try {
             userService.deleteUSer(id);
             return ResponseEntity.noContent().build();
