@@ -9,12 +9,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(name = "user_app")
+@Table(name = "customer")
 public class User {
 
     @Id
@@ -33,10 +36,17 @@ public class User {
     @Size(min = 6, message = "Senha deve ter no mínimo 6 caracteres")
     private String password;
 
-    @Embedded
-    private Address address;
-
     @NotNull(message = "O numero não pode ser nulo")
     @Size(min = 11, message = "O numero de telefone deve ter pelo menos 11 numeros")
     private String contactNumber;
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+    private Set<Order> orders = new HashSet<>();
+
+    public void add(Order order){
+        if (order != null){
+            orders.add(order);
+            order.setCustomer(this);
+        }
+    }
 }

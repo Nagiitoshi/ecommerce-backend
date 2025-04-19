@@ -1,17 +1,15 @@
 package com.nagis.company.ecommerce.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Entity
+@Table(name="product")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -22,13 +20,27 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String productName;
+    @ManyToOne
+    @JoinColumn(name="category_id", nullable=false)
+    private ProductCategory category;
 
-    private String productDescription;
+    private String sku;
 
-    private BigDecimal price;
+    private String name;
 
-    private Integer stock;
+    private String description;
+
+    private BigDecimal unitPrice;
 
     private String imageUrl;
+
+    private boolean active;
+
+    private int unitsInStock;
+
+    @CreationTimestamp
+    private Date dateCreated;
+
+    @UpdateTimestamp
+    private Date lastUpdated;
 }

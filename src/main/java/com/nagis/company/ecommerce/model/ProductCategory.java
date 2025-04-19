@@ -6,31 +6,24 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(name="order_item")
+@Table(name = "product_category")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class OrderItem {
+public class ProductCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String imageUrl;
+    @Column(name = "category_name")
+    private String categoryName;
 
-    private BigDecimal unitPrice;
-
-    private int quantity;
-
-    @ManyToOne
-    @JoinColumn(name="product_id")
-    private Product product;
-
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "category")
+    private Set<Product> products = new HashSet<>();
 }

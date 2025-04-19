@@ -9,28 +9,22 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name="order_item")
+@Table(name = "cart_item")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class OrderItem {
+public class CartItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String imageUrl;
-
-    private BigDecimal unitPrice;
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
 
     private int quantity;
 
-    @ManyToOne
-    @JoinColumn(name="product_id")
-    private Product product;
-
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
+    private BigDecimal unitPrice;
 }
