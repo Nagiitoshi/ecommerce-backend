@@ -26,9 +26,9 @@ public class Product {
 
     private String sku;
 
-    private String name;
+    private String ProductName;
 
-    private String description;
+    private String ProductDescription;
 
     private BigDecimal unitPrice;
 
