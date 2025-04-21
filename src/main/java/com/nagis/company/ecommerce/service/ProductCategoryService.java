@@ -16,11 +16,6 @@ public class ProductCategoryService {
     @Autowired
     private ProductCategoryRepository productCategoryRepository;
 
-    public List<ProductCategory> getAllCategories(){
-        return productCategoryRepository.findAll();
-    }
-
-
     public Optional<ProductCategory> getCategoryById(Long id){
         return productCategoryRepository.findById(id);
     }
