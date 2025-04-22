@@ -1,9 +1,16 @@
 package com.nagis.company.ecommerce.controller;
 
+import com.nagis.company.ecommerce.dto.product.ProductRequestDTO;
+import com.nagis.company.ecommerce.dto.product.ProductResponseDTO;
 import com.nagis.company.ecommerce.model.Product;
 import com.nagis.company.ecommerce.repository.ProductRepository;
 import com.nagis.company.ecommerce.service.ProductService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,51 +24,42 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @Autowired
-    private ProductRepository productRepository;
-
-    // Search all products
+    // Get paginated product list
     @GetMapping
-    public List<Product> getAllProducts(){
-        return productRepository.findAll();
+    public ResponseEntity<Page<ProductResponseDTO>> getAllProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(
+                productService.findAll(PageRequest.of(page, size))
+        );
     }
 
-    // Search product by id
-    @GetMapping("/search/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id){
-
-        Optional<Product> product = productService.findById(id);
-
-        return product.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    // Get single product by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.findById(id));
     }
 
     // Create new product
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-        return ResponseEntity.ok(productService.createProduct(product));
+    public ResponseEntity<ProductResponseDTO> createProduct(
+            @Valid @RequestBody ProductRequestDTO productDTO) {
+        ProductResponseDTO createdProduct = productService.createProduct(productDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
     }
 
-    // Update product by id
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Product> updateProductById(@PathVariable Long id, @RequestBody Product updateProduct){
-        try{
-            Product product = productService.updateProduct(id, updateProduct);
-
-            return ResponseEntity.ok(product);
-        }catch (IllegalArgumentException e){
-            return ResponseEntity.badRequest().build();
-        }
+    // Update existing product
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductResponseDTO> updateProduct(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductRequestDTO productDTO) {
+        return ResponseEntity.ok(productService.updateProduct(id, productDTO));
     }
 
-    // Delete product by id
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteProductById(@PathVariable Long id){
-        try {
-            productService.deleteProductById(id);
-            return ResponseEntity.noContent().build();
-        }catch (IllegalArgumentException e){
-            return ResponseEntity.notFound().build();
-        }
+    // Delete product
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        productService.deleteProductById(id);
+        return ResponseEntity.noContent().build();
     }
 }

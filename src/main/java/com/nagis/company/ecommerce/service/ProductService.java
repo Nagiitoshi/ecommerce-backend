@@ -1,13 +1,20 @@
 package com.nagis.company.ecommerce.service;
 
+import com.nagis.company.ecommerce.dto.product.ProductRequestDTO;
+import com.nagis.company.ecommerce.dto.product.ProductResponseDTO;
+import com.nagis.company.ecommerce.mapper.product.ProductMapper;
 import com.nagis.company.ecommerce.model.Product;
+
 import com.nagis.company.ecommerce.repository.ProductRepository;
 import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+
+
 
 @Service
 public class ProductService {
@@ -15,36 +22,46 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    // Search products by id
-    public Optional<Product> findById(Long id){
-        return productRepository.findById(id);
+    @Autowired
+    private ProductMapper productMapper;
+
+    // Busca por ID (retorna DTO)
+    public ProductResponseDTO findById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found!"));
+        return productMapper.toDTO(product);
     }
 
-    // Create the product
+    // Criação com DTO
     @Transactional
-    public Product createProduct(Product product){
-        return productRepository.save(product);
+    public ProductResponseDTO createProduct(ProductRequestDTO productDTO) {
+        Product product = productMapper.toEntity(productDTO);
+        Product savedProduct = productRepository.save(product);
+        return productMapper.toDTO(savedProduct);
     }
 
-    // Update product
+    // Atualização com DTO
     @Transactional
-    public Product updateProduct(Long id, Product product){
-
+    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productDTO) {
         Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found!!!"));
+                .orElseThrow(() -> new RuntimeException("Product not found!"));
 
-        existingProduct.setProductName(product.getProductName());
-        existingProduct.setProductDescription(product.getProductDescription());
-        existingProduct.setUnitPrice(product.getUnitPrice());
-        existingProduct.setUnitsInStock(product.getUnitsInStock());
-        existingProduct.setImageUrl(product.getImageUrl());
+        // Atualiza apenas os campos permitidos
+        productMapper.updateFromDTO(productDTO, existingProduct);
+        Product updatedProduct = productRepository.save(existingProduct);
 
-        return productRepository.save(existingProduct);
+        return productMapper.toDTO(updatedProduct);
     }
 
-    // Delete product by id
+    // Delete mantém igual
     @Transactional
-    public void deleteProductById(Long id){
-       productRepository.deleteById(id);
+    public void deleteProductById(Long id) {
+        productRepository.deleteById(id);
+    }
+
+    // Listagem paginada (opcional)
+    public Page<ProductResponseDTO> findAll(Pageable pageable) {
+        return productRepository.findAll(pageable)
+                .map(productMapper::toDTO);
     }
 }

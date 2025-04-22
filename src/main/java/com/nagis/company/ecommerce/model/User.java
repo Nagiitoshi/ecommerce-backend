@@ -1,47 +1,41 @@
 package com.nagis.company.ecommerce.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Table(name = "users")
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@Table(name = "customer")
+@Builder
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Nome não pode ser nulo")
-    @Size(min = 3, message = "Nome deve ter no mínimo 3 caracteres")
+    @Column(nullable = false)
     private String name;
 
-    @Email(message = "E-mail inválido")
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @NotNull(message = "Senha não pode ser nula")
-    @Size(min = 6, message = "Senha deve ter no mínimo 6 caracteres")
+    @Column(nullable = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @NotNull(message = "O numero não pode ser nulo")
-    @Size(min = 11, message = "O numero de telefone deve ter pelo menos 11 numeros")
+    @Column(name = "contact_number", nullable = false)
     private String contactNumber;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-    private Set<Order> orders = new HashSet<>();
+    @Embedded
+    private Address address;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -49,12 +43,6 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @Builder.Default
     private Set<Role> roles = new HashSet<>();
-
-    public void add(Order order){
-        if (order != null){
-            orders.add(order);
-            order.setCustomer(this);
-        }
-    }
 }

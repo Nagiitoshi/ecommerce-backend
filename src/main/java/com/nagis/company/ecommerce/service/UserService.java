@@ -1,12 +1,20 @@
 package com.nagis.company.ecommerce.service;
 
+import com.nagis.company.ecommerce.dto.user.UserRequestDTO;
+import com.nagis.company.ecommerce.dto.user.UserResponseDTO;
+import com.nagis.company.ecommerce.mapper.user.UserMapper;
+import com.nagis.company.ecommerce.model.Role;
 import com.nagis.company.ecommerce.model.User;
+import com.nagis.company.ecommerce.repository.RoleRepository;
 import com.nagis.company.ecommerce.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -14,45 +22,63 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // Create user if there is no existing email
-    @Transactional
-    public User createUser(User user){
-        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
+    @Autowired
+    private RoleRepository roleRepository;
 
-        if (existingUser.isPresent()){
-            throw new IllegalArgumentException("E-mail já está em uso!!!");
+    @Autowired
+    private UserMapper userMapper;
+
+    // Search all users
+    public Page<UserResponseDTO> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(userMapper::toDTO);
+    }
+
+    // Search user by Id
+    public UserResponseDTO findById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+        return userMapper.toDTO(user);
+    }
+
+    // Create new User
+    @Transactional
+    public UserResponseDTO create(UserRequestDTO userDTO) {
+        if (userRepository.existsByEmail(userDTO.email())) {
+            throw new RuntimeException("Email já cadastrado!");
         }
 
-        return userRepository.save(user);
+        User user = userMapper.toEntity(userDTO);
+        user.setRoles(fetchValidRoles(userDTO.roleIds()));
+
+        return userMapper.toDTO(userRepository.save(user));
     }
 
-    // Search user by id
-    public Optional<User> getUserById(Long id){
-        return userRepository.findById(id);
-    }
-
-    // Update user information
+    // Update existing user
     @Transactional
-    public User updatedUser(Long id, User updateUser){
-        Optional<User> existingUser = userRepository.findById(id);
+    public UserResponseDTO update(Long id, UserRequestDTO userDTO) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
 
-        if (existingUser.isEmpty()){
-            throw new IllegalArgumentException("Usário não Encontrado!!!");
-        }
+        // Update only allowed fields
+        userMapper.updateFromDTO(userDTO, existingUser);
+        existingUser.setRoles(fetchValidRoles(userDTO.roleIds()));
 
-        User user = existingUser.get();
-        user.setName(updateUser.getName());
-        user.setEmail(updateUser.getEmail());
-        user.setPassword(updateUser.getPassword());
-        user.setAddress(updateUser.getAddress());
-        user.setContactNumber(updateUser.getContactNumber());
-
-        return userRepository.save(user);
+        return userMapper.toDTO(userRepository.save(existingUser));
     }
 
-    // Delete User
+    // Delete User By Id
     @Transactional
-    public void deleteUSer(Long id){
+    public void deleteById(Long id) {
         userRepository.deleteById(id);
+    }
+
+    // Helper method to search for valid roles
+    private Set<Role> fetchValidRoles(Set<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) {
+            return Set.of(roleRepository.findByName("ROLE_USER")
+                    .orElseThrow(() -> new RuntimeException("Role padrão não encontrada")));
+        }
+        return new HashSet<>(roleRepository.findAllById(roleIds));
     }
 }
