@@ -1,6 +1,6 @@
 package com.nagis.company.ecommerce.dto.user;
 
-import com.nagis.company.ecommerce.model.Address;
+import com.nagis.company.ecommerce.model.user.Address;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

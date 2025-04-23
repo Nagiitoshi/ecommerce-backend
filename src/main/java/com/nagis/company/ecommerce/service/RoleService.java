@@ -4,7 +4,7 @@ import com.nagis.company.ecommerce.dto.role.RoleRequestDTO;
 import com.nagis.company.ecommerce.dto.role.RoleResponseDTO;
 import com.nagis.company.ecommerce.mapper.role.RoleMapper;
 import com.nagis.company.ecommerce.model.Role;
-import com.nagis.company.ecommerce.model.User;
+import com.nagis.company.ecommerce.model.user.User;
 import com.nagis.company.ecommerce.repository.RoleRepository;
 import com.nagis.company.ecommerce.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Service

@@ -1,4 +1,4 @@
-package com.nagis.company.ecommerce.model;
+package com.nagis.company.ecommerce.model.product;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
@@ -12,7 +12,6 @@ import org.hibernate.validator.constraints.URL;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 
 @Entity

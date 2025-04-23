@@ -1,12 +1,10 @@
 package com.nagis.company.ecommerce.repository;
 
-import com.nagis.company.ecommerce.model.ProductCategory;
+import com.nagis.company.ecommerce.model.product.ProductCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
 @Repository
 public interface ProductCategoryRepository extends JpaRepository<ProductCategory, Long> {
-    Optional<ProductCategory> findByCategoryName(String categoryName);
+    boolean existsByCategoryName(String categoryName);
 }

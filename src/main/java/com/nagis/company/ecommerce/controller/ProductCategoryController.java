@@ -1,15 +1,16 @@
 package com.nagis.company.ecommerce.controller;
 
-import com.nagis.company.ecommerce.model.ProductCategory;
-import com.nagis.company.ecommerce.repository.ProductCategoryRepository;
+import com.nagis.company.ecommerce.dto.product.ProductCategoryRequestDTO;
+import com.nagis.company.ecommerce.dto.product.ProductCategoryResponseDTO;
 import com.nagis.company.ecommerce.service.ProductCategoryService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -18,39 +19,21 @@ public class ProductCategoryController {
     @Autowired
     private ProductCategoryService productCategoryService;
 
-    @Autowired
-    private ProductCategoryRepository productCategoryRepository;
-
-    // Search All Category
-    @GetMapping
-    public List<ProductCategory> getAllCategories(){
-        return productCategoryRepository.findAll();
-    }
-
-    // Search Category by id
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductCategory> getCategoryById(@PathVariable Long id){
-        return productCategoryService.getCategoryById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // Create new Category
     @PostMapping
-    public ResponseEntity<ProductCategory> createProductCategory(@RequestBody ProductCategory category){
-        return ResponseEntity.status(HttpStatus.CREATED).body(productCategoryService.createCategory(category));
+    public ResponseEntity<ProductCategoryResponseDTO> create(
+            @Valid @RequestBody ProductCategoryRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(productCategoryService.create(dto));
     }
 
-    // Update Category by id
-    @PutMapping("/{id}")
-    public ResponseEntity<ProductCategory> updateProductCategoryById(@PathVariable Long id,@RequestBody ProductCategory category){
-        return ResponseEntity.ok(productCategoryService.updateCategory(id, category));
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductCategoryResponseDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(productCategoryService.findById(id));
     }
 
-    // Delete Category by id
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategoryById(@PathVariable Long id) {
-        productCategoryService.deleteCategoryById(id);
-        return ResponseEntity.noContent().build();
+    @PostMapping("/{categoryId}/products")
+    public ResponseEntity<ProductCategoryResponseDTO> addProducts(
+            @PathVariable Long categoryId,
+            @RequestBody Set<Long> productIds) {
+        return ResponseEntity.ok(productCategoryService.addProducts(categoryId, productIds));
     }
 }

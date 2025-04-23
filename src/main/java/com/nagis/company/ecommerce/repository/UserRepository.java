@@ -1,6 +1,6 @@
 package com.nagis.company.ecommerce.repository;
 
-import com.nagis.company.ecommerce.model.User;
+import com.nagis.company.ecommerce.model.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,5 +1,6 @@
 package com.nagis.company.ecommerce.model;
 
+import com.nagis.company.ecommerce.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,10 +1,8 @@
-package com.nagis.company.ecommerce.model;
+package com.nagis.company.ecommerce.model.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.nagis.company.ecommerce.model.Role;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.HashSet;

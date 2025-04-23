@@ -1,12 +1,19 @@
 package com.nagis.company.ecommerce.controller;
 
-import com.nagis.company.ecommerce.model.User;
+import com.nagis.company.ecommerce.dto.user.UserRequestDTO;
+import com.nagis.company.ecommerce.dto.user.UserResponseDTO;
+import com.nagis.company.ecommerce.model.user.User;
 import com.nagis.company.ecommerce.repository.UserRepository;
 import com.nagis.company.ecommerce.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,52 +24,40 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private UserRepository userRepository;
 
-
-    // Search all products
     @GetMapping
-    public List<User> getAllUsers(){
-        return userRepository.findAll();
+    public ResponseEntity<Page<UserResponseDTO>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(userService.findAll(PageRequest.of(page, size)));
     }
 
-    // Search product by id
-    @GetMapping("/search/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id){
-        Optional<User> user = userService.getUserById(id);
-
-        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    // Create a new user
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user){
-        User createdUser =userService.createUser(user);
-
-        return ResponseEntity.ok(createdUser);
+    public ResponseEntity<UserResponseDTO> createUser(
+            @Valid @RequestBody UserRequestDTO userDTO) {
+        UserResponseDTO createdUser = userService.createUser(userDTO);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(createdUser.id())
+                .toUri();
+        return ResponseEntity.created(location).body(createdUser);
     }
 
-    // Update user by id
-    @PutMapping("/update/{id}")
-    public ResponseEntity<User> updateUserById(@PathVariable Long id, @RequestBody User updatedUser){
-        try{
-            User user = userService.updatedUser(id, updatedUser);
-
-            return ResponseEntity.ok(user);
-        }catch (IllegalArgumentException e){
-            return ResponseEntity.badRequest().build();
-        }
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UserRequestDTO userDTO) {
+        return ResponseEntity.ok(userService.updatedUser(id, userDTO));
     }
 
-    // Delete user by id
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteUserById(@PathVariable Long id){
-        try {
-            userService.deleteUSer(id);
-            return ResponseEntity.noContent().build();
-        }catch (IllegalArgumentException e){
-            return ResponseEntity.notFound().build();
-        }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -3,7 +3,7 @@ package com.nagis.company.ecommerce.mapper.user;
 import com.nagis.company.ecommerce.dto.user.UserRequestDTO;
 import com.nagis.company.ecommerce.dto.user.UserResponseDTO;
 import com.nagis.company.ecommerce.model.Role;
-import com.nagis.company.ecommerce.model.User;
+import com.nagis.company.ecommerce.model.user.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

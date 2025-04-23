@@ -1,5 +1,6 @@
-package com.nagis.company.ecommerce.model;
+package com.nagis.company.ecommerce.model.order;
 
+import com.nagis.company.ecommerce.model.product.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

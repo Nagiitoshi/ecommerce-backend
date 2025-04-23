@@ -1,16 +1,17 @@
 package com.nagis.company.ecommerce.controller;
 
-import com.nagis.company.ecommerce.model.Order;
-
-import com.nagis.company.ecommerce.model.ProductCategory;
-import com.nagis.company.ecommerce.repository.OrderRepository;
+import com.nagis.company.ecommerce.dto.order.OrderItemRequestDTO;
+import com.nagis.company.ecommerce.dto.order.OrderRequestDTO;
+import com.nagis.company.ecommerce.dto.order.OrderResponseDTO;
+import com.nagis.company.ecommerce.model.order.OrderStatus;
 import com.nagis.company.ecommerce.service.OrderService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/orders")
@@ -19,44 +20,40 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @Autowired
-    private OrderRepository orderRepository;
 
-    // Search All Orders
-    @GetMapping
-    public List<Order> getAllOrders(){
-        return orderRepository.findAll();
-    }
-
-    // Search Order by id
-    @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long id){
-        return orderService.getOrderById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    // Create new Order
     @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody Order order){
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(order));
+    public ResponseEntity<OrderResponseDTO> createOrder(
+            @Valid @RequestBody OrderRequestDTO orderDTO) {
+        OrderResponseDTO createdOrder = orderService.createOrder(orderDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
     }
 
-    // Update Order by id
-    @PutMapping("/{id}")
-    public ResponseEntity<Order> updateOrder(@PathVariable Long id, @RequestBody Order order) {
-        try {
-            Order updatedOrder = orderService.updateOrder(id, order);
-            return ResponseEntity.ok(updatedOrder);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    @PostMapping("/{orderId}/items")
+    public ResponseEntity<OrderResponseDTO> addItem(
+            @PathVariable Long orderId,
+            @Valid @RequestBody OrderItemRequestDTO itemDTO) {
+        return ResponseEntity.ok(
+                orderService.addItemToOrder(orderId, itemDTO)
+        );
     }
 
-            // Delete Order by id
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrderById(@PathVariable Long id) {
-        orderService.deleteOrderById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderResponseDTO> getOrderById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderById(id));
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<OrderResponseDTO> updateOrderStatus(
+            @PathVariable Long id,
+            @RequestParam OrderStatus status) {
+        return ResponseEntity.ok(orderService.updateOrderStatus(id, status));
+    }
+
+    @DeleteMapping("/{orderId}/items/{itemId}")
+    public ResponseEntity<Void> removeItem(
+            @PathVariable Long orderId,
+            @PathVariable Long itemId) {
+        orderService.removeItemFromOrder(orderId, itemId);
         return ResponseEntity.noContent().build();
     }
 }

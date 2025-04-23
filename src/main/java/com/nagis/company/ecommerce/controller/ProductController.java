@@ -2,20 +2,14 @@ package com.nagis.company.ecommerce.controller;
 
 import com.nagis.company.ecommerce.dto.product.ProductRequestDTO;
 import com.nagis.company.ecommerce.dto.product.ProductResponseDTO;
-import com.nagis.company.ecommerce.model.Product;
-import com.nagis.company.ecommerce.repository.ProductRepository;
 import com.nagis.company.ecommerce.service.ProductService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/products")

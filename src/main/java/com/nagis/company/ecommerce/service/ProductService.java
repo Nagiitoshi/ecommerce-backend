@@ -3,7 +3,7 @@ package com.nagis.company.ecommerce.service;
 import com.nagis.company.ecommerce.dto.product.ProductRequestDTO;
 import com.nagis.company.ecommerce.dto.product.ProductResponseDTO;
 import com.nagis.company.ecommerce.mapper.product.ProductMapper;
-import com.nagis.company.ecommerce.model.Product;
+import com.nagis.company.ecommerce.model.product.Product;
 
 import com.nagis.company.ecommerce.repository.ProductRepository;
 import jakarta.transaction.Transactional;

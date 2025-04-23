@@ -1,5 +1,7 @@
-package com.nagis.company.ecommerce.model;
+package com.nagis.company.ecommerce.model.order;
 
+import com.nagis.company.ecommerce.model.user.Address;
+import com.nagis.company.ecommerce.model.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -57,10 +59,18 @@ public class Order {
     @JoinColumn(name = "billing_address_id", referencedColumnName = "id")
     private Address billingAddress;
 
-    public void add(OrderItem item) {
+    public void addItem(OrderItem item) {
         if (item != null) {
             orderItems.add(item);
             item.setOrder(this);
         }
+    }
+
+    public void removeItem(Long itemId) {
+        OrderItem item = this.orderItems.stream()
+                .filter(i -> i.getId().equals(itemId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Item não encontrado"));
+        this.orderItems.remove(item);
     }
 }

@@ -2,8 +2,8 @@ package com.nagis.company.ecommerce.mapper.product;
 
 import com.nagis.company.ecommerce.dto.product.ProductRequestDTO;
 import com.nagis.company.ecommerce.dto.product.ProductResponseDTO;
-import com.nagis.company.ecommerce.model.Product;
-import com.nagis.company.ecommerce.model.ProductCategory;
+import com.nagis.company.ecommerce.model.product.Product;
+import com.nagis.company.ecommerce.model.product.ProductCategory;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
