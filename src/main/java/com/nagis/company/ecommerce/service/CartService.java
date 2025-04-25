@@ -2,6 +2,9 @@ package com.nagis.company.ecommerce.service;
 
 import com.nagis.company.ecommerce.dto.cart.CartItemRequestDTO;
 import com.nagis.company.ecommerce.dto.cart.CartResponseDTO;
+import com.nagis.company.ecommerce.exception.cart.CartNotFoundException;
+import com.nagis.company.ecommerce.exception.product.InsufficientStockException;
+import com.nagis.company.ecommerce.exception.product.ProductNotFoundException;
 import com.nagis.company.ecommerce.mapper.cart.CartItemMapper;
 import com.nagis.company.ecommerce.mapper.cart.CartMapper;
 import com.nagis.company.ecommerce.model.cart.Cart;
@@ -49,7 +52,7 @@ public class CartService {
                 .orElseGet(() -> createNewCart(userId));
 
         Product product = productRepository.findById(itemDTO.productId())
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new ProductNotFoundException(userId));
 
         validateStock(product, itemDTO.quantity());
 
@@ -68,12 +71,12 @@ public class CartService {
     @Transactional
     public CartResponseDTO updateItemQuantity(Long userId, Long itemId, int newQuantity) {
         Cart cart = cartRepository.findByUserIdWithItems(userId)
-                .orElseThrow(() -> new RuntimeException("Carrinho não encontrado"));
+                .orElseThrow(() -> new CartNotFoundException(userId));
 
         CartItem item = cart.getItems().stream()
                 .filter(i -> i.getId().equals(itemId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Item não encontrado no carrinho"));
+                .orElseThrow(() -> new ProductNotFoundException(userId));
 
         validateStock(item.getProduct(), newQuantity);
         item.setQuantity(newQuantity);
@@ -85,7 +88,7 @@ public class CartService {
     @Transactional
     public void removeItemFromCart(Long userId, Long itemId) {
         Cart cart = cartRepository.findByUserIdWithItems(userId)
-                .orElseThrow(() -> new RuntimeException("Carrinho não encontrado"));
+                .orElseThrow(() -> new CartNotFoundException(userId));
 
         boolean removed = cart.getItems().removeIf(item -> item.getId().equals(itemId));
         if (removed) {
@@ -97,7 +100,7 @@ public class CartService {
     @Transactional
     public void clearCart(Long userId) {
         Cart cart = cartRepository.findByUserIdWithItems(userId)
-                .orElseThrow(() -> new RuntimeException("Carrinho não encontrado"));
+                .orElseThrow(() -> new CartNotFoundException(userId));
         cart.getItems().clear();
         cart.setTotalPrice(BigDecimal.ZERO);
         cartRepository.save(cart);
@@ -123,7 +126,7 @@ public class CartService {
 
     private void validateStock(Product product, int requestedQuantity) {
         if (product.getStockQuantity() < requestedQuantity) {
-            throw new RuntimeException("Estoque insuficiente para o produto: " + product.getName());
+            throw new InsufficientStockException(product.getName());
         }
     }
 }

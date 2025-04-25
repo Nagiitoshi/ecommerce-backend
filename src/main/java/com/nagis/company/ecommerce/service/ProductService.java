@@ -2,6 +2,9 @@ package com.nagis.company.ecommerce.service;
 
 import com.nagis.company.ecommerce.dto.product.ProductRequestDTO;
 import com.nagis.company.ecommerce.dto.product.ProductResponseDTO;
+import com.nagis.company.ecommerce.exception.product.InsufficientStockException;
+import com.nagis.company.ecommerce.exception.product.ProductInactiveException;
+import com.nagis.company.ecommerce.exception.product.ProductNotFoundException;
 import com.nagis.company.ecommerce.mapper.product.ProductMapper;
 import com.nagis.company.ecommerce.model.product.Product;
 
@@ -28,7 +31,7 @@ public class ProductService {
     // Busca por ID (retorna DTO)
     public ProductResponseDTO findById(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found!"));
+                .orElseThrow(() -> new ProductNotFoundException(id));
         return productMapper.toDTO(product);
     }
 
@@ -44,7 +47,7 @@ public class ProductService {
     @Transactional
     public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productDTO) {
         Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found!"));
+                .orElseThrow(() -> new ProductNotFoundException(id));
 
         // Atualiza apenas os campos permitidos
         productMapper.updateFromDTO(productDTO, existingProduct);

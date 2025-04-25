@@ -3,6 +3,7 @@ package com.nagis.company.ecommerce.service;
 import com.nagis.company.ecommerce.dto.order.OrderItemRequestDTO;
 import com.nagis.company.ecommerce.dto.order.OrderRequestDTO;
 import com.nagis.company.ecommerce.dto.order.OrderResponseDTO;
+import com.nagis.company.ecommerce.exception.order.OrderNotFoundException;
 import com.nagis.company.ecommerce.mapper.order.OrderItemMapper;
 import com.nagis.company.ecommerce.mapper.order.OrderMapper;
 import com.nagis.company.ecommerce.model.order.Order;
@@ -40,7 +41,7 @@ public class OrderService {
 
     public OrderResponseDTO getOrderById(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + id));
+                .orElseThrow(() -> new OrderNotFoundException(id));
 
         return orderMapper.toDTO(order);
     }
@@ -79,7 +80,7 @@ public class OrderService {
     @Transactional
     public OrderResponseDTO updateOrderStatus(Long orderId, OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + orderId));
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
 
         order.setStatus(OrderStatus.valueOf(newStatus.name())); // se status for String no model
         orderRepository.save(order);
@@ -91,7 +92,7 @@ public class OrderService {
     @Transactional
     public OrderResponseDTO addItemToOrder(Long orderId, OrderItemRequestDTO itemDTO) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
 
         OrderItem item = orderItemMapper.toEntity(itemDTO);
         order.addItem(item);
@@ -104,7 +105,7 @@ public class OrderService {
     @Transactional
     public OrderResponseDTO removeItemFromOrder(Long orderId, Long itemId) {
         Order order = orderRepository.findByIdWithItems(orderId)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
 
         order.removeItem(itemId);
         return orderMapper.toDTO(orderRepository.save(order));

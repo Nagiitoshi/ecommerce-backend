@@ -2,7 +2,9 @@ package com.nagis.company.ecommerce.service;
 
 import com.nagis.company.ecommerce.dto.user.UserRequestDTO;
 import com.nagis.company.ecommerce.dto.user.UserResponseDTO;
+import com.nagis.company.ecommerce.exception.BusinessException;
 import com.nagis.company.ecommerce.exception.user.DuplicateEmailException;
+import com.nagis.company.ecommerce.exception.user.InactiveUserException;
 import com.nagis.company.ecommerce.exception.user.UserNotFoundException;
 import com.nagis.company.ecommerce.mapper.user.UserMapper;
 import com.nagis.company.ecommerce.model.Role;
@@ -13,6 +15,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -45,11 +48,11 @@ public class UserService {
     @Transactional
     public UserResponseDTO createUser(UserRequestDTO userDTO) {
         if (userRepository.existsByEmail(userDTO.email())) {
-            throw new DuplicateEmailException(userDTO.email());
+            throw new DuplicateEmailException(userDTO.email()); // Exceção de conflito
         }
 
         User user = userMapper.toEntity(userDTO);
-        user.setRoles(fetchValidRoles(userDTO.roleIds()));
+        user.setRoles(fetchValidRoles(userDTO.roleIds())); // Pode lançar RoleNotFoundException
 
         return userMapper.toDTO(userRepository.save(user));
     }
@@ -73,11 +76,20 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+
     private Set<Role> fetchValidRoles(Set<Long> roleIds) {
         if (roleIds == null || roleIds.isEmpty()) {
+            // Exceção para role padrão não configurada
             return Set.of(roleRepository.findByName("ROLE_USER")
-                    .orElseThrow(() -> new RuntimeException("Role padrão não encontrada")));
+                    .orElseThrow(() -> new BusinessException("Role padrão não configurada", HttpStatus.INTERNAL_SERVER_ERROR)));
         }
-        return new HashSet<>(roleRepository.findAllById(roleIds));
+
+        Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
+        if (roles.size() != roleIds.size()) {
+            // Exceção para IDs de roles inválidos
+            throw new BusinessException("IDs de roles inválidos", HttpStatus.BAD_REQUEST);
+        }
+        return roles;
     }
 }
+
