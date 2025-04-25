@@ -2,6 +2,8 @@ package com.nagis.company.ecommerce.service;
 
 import com.nagis.company.ecommerce.dto.user.UserRequestDTO;
 import com.nagis.company.ecommerce.dto.user.UserResponseDTO;
+import com.nagis.company.ecommerce.exception.user.DuplicateEmailException;
+import com.nagis.company.ecommerce.exception.user.UserNotFoundException;
 import com.nagis.company.ecommerce.mapper.user.UserMapper;
 import com.nagis.company.ecommerce.model.Role;
 import com.nagis.company.ecommerce.model.user.User;
@@ -35,14 +37,15 @@ public class UserService {
 
     public UserResponseDTO getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+                .orElseThrow(() -> new UserNotFoundException(id));
+
         return userMapper.toDTO(user);
     }
 
     @Transactional
     public UserResponseDTO createUser(UserRequestDTO userDTO) {
         if (userRepository.existsByEmail(userDTO.email())) {
-            throw new RuntimeException("Email já cadastrado!");
+            throw new DuplicateEmailException(userDTO.email());
         }
 
         User user = userMapper.toEntity(userDTO);
